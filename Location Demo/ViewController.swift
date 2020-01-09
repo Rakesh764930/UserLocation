@@ -7,14 +7,81 @@
 //
 
 import UIKit
+import CoreLocation
+import  MapKit
+class ViewController: UIViewController,CLLocationManagerDelegate {
 
-class ViewController: UIViewController {
-
+    @IBOutlet weak var mapView: MKMapView!
+    //create a variable of a CLLocationManager
+    var locationManager=CLLocationManager()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        locationManager.delegate=self
+        locationManager.desiredAccuracy=kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
     }
 
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        //grabbing the user location
+        let userLocation:CLLocation=locations[0]
+        //print(userLocation)
+        
+        let lat=userLocation.coordinate.latitude
+        let long=userLocation.coordinate.longitude
+        
+        let latDelta:CLLocationDegrees=0.05
+              let longDelta:CLLocationDegrees=0.05
+        
+        let span = MKCoordinateSpan(latitudeDelta: latDelta, longitudeDelta: longDelta)
+        
+        let location = CLLocationCoordinate2D(latitude: lat, longitude: long)
+        
+        let region=MKCoordinateRegion(center: location, span: span)
+        mapView.setRegion(region, animated: true)
+           // finding the user address from the user's location
+        CLGeocoder().reverseGeocodeLocation(userLocation) { (placemarks, error) in
+          if let error = error {
+            print(error)
+          } else {
+            if let placemark = placemarks?[0] {
+              var subThoroufare = ""
+              if placemark.subThoroughfare != nil {
+                subThoroufare = placemark.subThoroughfare!
+              }
+              var thoroufare = ""
+              if placemark.thoroughfare != nil {
+                thoroufare = placemark.thoroughfare!
+              }
+              var subLocality = ""
+              if placemark.subLocality != nil{
+                subLocality = placemark.subLocality!
+                 
+              }
+              var administrativeArea = ""
+              if placemark.administrativeArea != nil
+              {
+                administrativeArea = placemark.administrativeArea!
+              }
+              var country = ""
+              if placemark.country != nil {
+                country = placemark.country!
+              }
+              print(subThoroufare + thoroufare + "\n" + subLocality + "\n" + administrativeArea + "\n" + country)
+            }
+          }
+        }
 
+
+
+
+
+
+        
+        
+    }
 }
 
